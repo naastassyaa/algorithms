@@ -1,18 +1,30 @@
-def solution(matrix):
-    res = []
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            if i % 2 == 0:
-                res.append(matrix[i][j])
+def quick_sort(s):
+    if len(s) <= 1:
+        return s
+
+    elem = s[0]
+    left = list(filter(lambda x: x < elem, s))
+    center = [i for i in s if i == elem]
+    right = list(filter(lambda x: x > elem, s))
+    return quick_sort(left) + center + quick_sort(right)
+
+
+def find_sum(s, sum_to_find):
+    s = quick_sort(s)
+
+    for i in range(len(s) - 2):
+        left = i + 1
+        right = len(s) - 1
+        while left < right:
+            if s[i] + s[left] + s[right] == sum_to_find:
+                return True
+            elif s[i] + s[left] + s[right] < sum_to_find:
+                left += 1
             else:
-                res.append(matrix[i][-1 - j])
-    return " ".join(res)
+                right -= 1
+    return False
 
 
-if __name__ == "__main__":
-    m, n = [int(i) for i in input().split()]
-    matrix = []
-    for i in range(m):
-        matrix.append([i for i in input().split()])
-
-    print(solution(matrix))
+s = [int(i) for i in input().split()]
+sum_to_find = int(input())
+print(find_sum(s, sum_to_find))
