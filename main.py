@@ -1,30 +1,40 @@
-def quick_sort(s):
-    if len(s) <= 1:
-        return s
-
-    elem = s[0]
-    left = list(filter(lambda x: x < elem, s))
-    center = [i for i in s if i == elem]
-    right = list(filter(lambda x: x > elem, s))
-    return quick_sort(left) + center + quick_sort(right)
+class BinaryTree:
+    def __init__(self, value, left=None, right=None, parent=None):
+        self.value = value
+        self.left = left
+        self.right = right
+        self.parent = parent
 
 
-def find_sum(s, sum_to_find):
-    s = quick_sort(s)
+def find_successor(tree: BinaryTree, node: BinaryTree) -> BinaryTree:
+    visited = []
 
-    for i in range(len(s) - 2):
-        left = i + 1
-        right = len(s) - 1
-        while left < right:
-            if s[i] + s[left] + s[right] == sum_to_find:
-                return True
-            elif s[i] + s[left] + s[right] < sum_to_find:
-                left += 1
-            else:
-                right -= 1
-    return False
+    def traverse_in_order(node):
+        if node.left:
+            traverse_in_order(node.left)
+        visited.append(node)
+        if node.right:
+            traverse_in_order(node.right)
+
+    traverse_in_order(tree)
+    pos = visited.index(node)
+    for i in visited[pos:]:
+        if i.value > node.value:
+            return i
 
 
-s = [int(i) for i in input().split()]
-sum_to_find = int(input())
-print(find_sum(s, sum_to_find))
+root = BinaryTree(10)
+root.left = BinaryTree(5)
+root.right = BinaryTree(15)
+root.left.left = BinaryTree(3)
+root.left.right = BinaryTree(7)
+root.right.right = BinaryTree(20)
+root.right.right.left = BinaryTree(12)
+
+node_to_find_successor = root.left
+successor = find_successor(root, node_to_find_successor)
+
+if successor:
+    print(successor.value)
+else:
+    print("Немає наступника для даної вершини.")
