@@ -1,40 +1,54 @@
-class BinaryTree:
-    def __init__(self, value, left=None, right=None, parent=None):
-        self.value = value
-        self.left = left
-        self.right = right
-        self.parent = parent
+import heapq
 
 
-def find_successor(tree: BinaryTree, node: BinaryTree) -> BinaryTree:
-    visited = []
+def dijkstra(graph, start):
+    n = len(graph)
+    dist = [float('inf')] * n
+    dist[start] = 0
+    visited = [False] * n
+    queue = [(0.0, start)]
 
-    def traverse_in_order(node):
-        if node.left:
-            traverse_in_order(node.left)
-        visited.append(node)
-        if node.right:
-            traverse_in_order(node.right)
+    while queue:
+        distance, vertex = heapq.heappop(queue)
+        if visited[vertex]:
+            continue
+        visited[vertex] = True
 
-    traverse_in_order(tree)
-    pos = visited.index(node)
-    for i in visited[pos:]:
-        if i.value > node.value:
-            return i
+        for v, w in graph[vertex]:
+            if dist[vertex] + w < dist[v]:
+                dist[v] = dist[vertex] + w
+                heapq.heappush(queue, (dist[v], v))
+
+    return dist
 
 
-root = BinaryTree(10)
-root.left = BinaryTree(5)
-root.right = BinaryTree(15)
-root.left.left = BinaryTree(3)
-root.left.right = BinaryTree(7)
-root.right.right = BinaryTree(20)
-root.right.right.left = BinaryTree(12)
+with open("gamsrv.in", "r") as input_file:
+    N, M = map(int, input_file.readline().split())
+    clients = [int(i) - 1 for i in input_file.readline().split()]
+    graph = [[] for _ in range(N)]
 
-node_to_find_successor = root.left
-successor = find_successor(root, node_to_find_successor)
+    for _ in range(M):
+        startnode, endnode, latency = map(int, input_file.readline().split())
+        graph[startnode - 1].append([endnode - 1, latency])
+        graph[endnode - 1].append([startnode - 1, latency])
 
-if successor:
-    print(successor.value)
-else:
-    print("Немає наступника для даної вершини.")
+min_max_latency = float('inf')
+min_node = -1
+
+for server_node in range(N):
+    if server_node not in clients:
+        max_latency = 0
+        dist = dijkstra(graph, server_node)
+        for i in range(len(dist)):
+            if i in clients and dist[i] > max_latency:
+                max_latency = dist[i]
+
+        if max_latency < min_max_latency:
+            min_max_latency = max_latency
+            min_node = server_node
+
+with open("gamsrv.out", "w") as output_file:
+    output_file.write(str(min_max_latency) + " ")
+    output_file.write(str(min_node + 1))
+
+
